@@ -21,7 +21,6 @@ while True:
     soup = BeautifulSoup(rs.content, "html.parser")
 
     need = soup.select_one("#toolbar-amount > .toolbar-number").text
-    print(need, " товаров ", DT.datetime.now().strftime("%H:%M %d.%m.%Y"), sep="")
     print(f"{need} товаров {DT.datetime.now():%H:%M %d.%m.%Y}")
 
     if prev_val is not None and prev_val != need:
