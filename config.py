@@ -26,3 +26,5 @@ except:
     sys.exit()
 
 CHAT_ID = 321346650
+
+LAST_VALUE = DIR / "prev_val.txt"
