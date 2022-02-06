@@ -79,16 +79,15 @@ while True:
             tg_notify_bot.send_message(config.CHAT_ID, f"Alarm! Warning! Products = {need} now!")
 
     except Exception as e:
-        print(traceback.format_exc())
+        print(traceback.format_exc(), file=sys.stderr)
 
         err_count -= 1
         if err_count <= 0:
-            tg_notify_bot.send_message(config.CHAT_ID, f"Alarm! Too many retries failed! {e}")
+            tg_notify_bot.send_message(config.CHAT_ID, f"😡 Alarm! Too many retries failed! 😡 {e}")
             time.sleep(60*60)
 
         time.sleep(15)
         continue
-
 
     err_count = MAX_ATT
     time.sleep(60*60)
