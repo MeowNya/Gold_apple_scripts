@@ -6,14 +6,44 @@ __author__ = 'MeowNya'
 
 import datetime as DT
 import time
-import traceback
 import sys
+import logging
+from pathlib import Path
 
 import requests
 import re
 
 import config
 import tg_notify_bot
+
+
+def get_logger(file_name: str, dir_name='logs'):
+    dir_name = Path(dir_name).resolve()
+    dir_name.mkdir(parents=True, exist_ok=True)
+
+    file_name = str(dir_name / Path(file_name).resolve().name) + '.log'
+
+    log = logging.getLogger(__name__)
+    log.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter('[%(asctime)s] %(filename)s[LINE:%(lineno)d] %(levelname)-8s %(message)s')
+
+    fh = logging.FileHandler(file_name, encoding='utf-8')
+    fh.setLevel(logging.DEBUG)
+
+    ch = logging.StreamHandler(stream=sys.stdout)
+    ch.setLevel(logging.DEBUG)
+
+    fh.setFormatter(formatter)
+    ch.setFormatter(formatter)
+
+    log.addHandler(fh)
+    log.addHandler(ch)
+
+    return log
+
+
+log = get_logger('loggs')
 
 
 def data_read() -> str:
@@ -36,7 +66,7 @@ def parse_page():
 
     url_api_products = m.group(1)
 
-    print(f'Using API: {url_api_products}')
+    log.debug(f'Using API: {url_api_products}')
 
     total = 0
     page = 1
@@ -60,12 +90,12 @@ err_count = MAX_ATT
 prev_val = None
 if config.LAST_VALUE.exists():
     prev_val = data_read()
-    print(prev_val)
+    log.debug(f"pre_val = {prev_val}")
 
 while True:
     try:
         need = str(parse_page())
-        print(f"{need} товаров {DT.datetime.now():%H:%M %d.%m.%Y}")
+        log.debug(f"{need} товаров")
 
         if prev_val is None:
             prev_val = need
@@ -75,11 +105,11 @@ while True:
             prev_val = need
             data_write(need)
 
-            print(f"Alarm! Warning! Products = {need} now!", file=sys.stderr)
+            log.debug(f"Alarm! Warning! Products = {need} now!")
             tg_notify_bot.send_message(config.CHAT_ID, f"Alarm! Warning! Products = {need} now!")
 
     except Exception as e:
-        print(traceback.format_exc(), file=sys.stderr)
+        log.exception("error: ")
 
         err_count -= 1
         if err_count <= 0:
